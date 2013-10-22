@@ -9,7 +9,7 @@
     tools:context=".MyShowsActivity" >
 
     <GridView
-        android:id="@+id/gridView1"
+        android:id="@+id/gvShowList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"

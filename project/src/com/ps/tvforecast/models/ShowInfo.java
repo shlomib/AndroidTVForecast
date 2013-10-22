@@ -15,6 +15,7 @@ public  class ShowInfo {
 	
     //properties of show
     public static final String SHOW = "show";
+    public static final String SHOW_ID = "id";
     public static final String SHOW_NAME = "name";
     public static final String SHOW_STATUS = "status";
     public static final String SHOW_COUNTRY = "country";
@@ -62,6 +63,28 @@ public  class ShowInfo {
     	for( String property : properties.keySet()) {
     		Log.d("DEBUG", "key : " + property + " value: " + properties.get(property));
     	}
+    }
+    
+    public String getAsString() {
+    	String ret = "";
+    	String showName = this.getPropertyByName(SHOW_NAME);
+    	String nextExpisodeNum =  this.getPropertyByName(SHOW_NEXT_EPISODE_NUMBER);
+    	String nextExpisodeTitle = this.getPropertyByName(SHOW_NEXT_EPISODE_TITLE);
+    	String nextEpisodeDate = this.getPropertyByName(SHOW_NEXT_EPISODE_DATE);
+    	if(showName!=null) {
+    	ret += showName + "\n";
+    	}
+    	if(nextExpisodeNum!=null) {
+    	ret += nextExpisodeNum + "\n";
+    	}
+    	if(nextExpisodeTitle!=null) {
+    		ret += nextExpisodeTitle + "\n";
+    	}
+    	if(nextEpisodeDate!=null) {
+    		ret += SHOW_NEXT_EPISODE_DATE;
+    	}
+    	return ret;
+    	
     }
     
     
