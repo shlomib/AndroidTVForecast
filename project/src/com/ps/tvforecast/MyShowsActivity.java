@@ -28,7 +28,7 @@ public class MyShowsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_my_shows);
 		showInfoList.clear();
-		String[] shows = {"25056", "24493", "27811"};
+		String[] shows = {"25056", "24493", "27811", "8511", "22622"};
 		showsList = Arrays.asList(shows);
 		//showInfoList = restClient.getShows(showsList);
 		ShowsModelSingleton.initInstance(getApplicationContext());
@@ -45,7 +45,7 @@ public class MyShowsActivity extends Activity {
 		//showInfoList.clear();
 		Map<String,String> properties = new HashMap<String, String>();
 		properties.put(ShowInfo.SHOW_ID, "8511");
-		properties.put(ShowInfo.SHOW_NAME, "The Big Bang Theory");
+		properties.put(ShowInfo.SHOW_NAME, "Foo Bar The Big Bang Theory");
 		properties.put(ShowInfo.SHOW_NEXT_EPISODE_DATE, "1382652000");
 		properties.put(ShowInfo.SHOW_NEXT_EPISODE_NUMBER,"07x06");
 		properties.put(ShowInfo.SHOW_NEXT_EPISODE_TITLE, "The Romance Resonance");
@@ -55,7 +55,7 @@ public class MyShowsActivity extends Activity {
 		
 		Map<String,String> properties2 = new HashMap<String, String>();
 		properties2.put(ShowInfo.SHOW_ID, "22622");
-		properties2.put(ShowInfo.SHOW_NAME, "Modern Family");
+		properties2.put(ShowInfo.SHOW_NAME, "Foo bar Modern Family");
 		properties2.put(ShowInfo.SHOW_NEXT_EPISODE_DATE, "1382569200");
 		properties2.put(ShowInfo.SHOW_NEXT_EPISODE_NUMBER,"05x06");
 		properties2.put(ShowInfo.SHOW_NEXT_EPISODE_TITLE, "The Help");

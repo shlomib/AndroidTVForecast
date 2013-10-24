@@ -18,7 +18,7 @@ private class RestClient extends AsyncTask<String, Integer, ArrayList<ShowInfo>>
         int count = urls.length;
         long totalSize = 0;
         for () {
-           
+
             // Escape early if cancel() is called
             if (isCancelled()) break;
         }
@@ -33,11 +33,14 @@ private class RestClient extends AsyncTask<String, Integer, ArrayList<ShowInfo>>
         showDialog("Downloaded " + result + " bytes");
     }
 }
-*/
+ */
+
 
 
 public class RestClient 
 {
+	private final String TvRageError = "max_user_connections";
+	private final int TvRageErrorNumRetries = 3;
 	public static final String REST_URL = "http://services.tvrage.com/feeds/";
 	//List<ShowInfo> showInfoList = new ArrayList<ShowInfo>();
 
@@ -45,6 +48,7 @@ public class RestClient
 		AsyncHttpClient client = new AsyncHttpClient();
 		Log.d("DEBUG", "apiUrl is " + apiUrl);
 		client.get( apiUrl, responseHndlr);
+		
 	}
 
 
@@ -53,28 +57,50 @@ public class RestClient
 		String apiUrl;
 
 		for(String showId: showIdList) {
-			apiUrl = REST_URL + "episodeinfo.php?sid=" + showId;
-/*
-			ResponseHandler<String> respHandlr = new BasicResponseHandler();
-			HttpGet getRequest = new HttpGet(apiUrl);
-			HttpClient client = new DefaultHttpClient();
-
-			String response;
-			try {
-				response = client.execute(getRequest, respHandlr);
-
+			
+			updateShow(showId);
+		}
+		//Log.d("DEBUG", "Return the length of showInfoList" + showInfoList.size());
+		//return showInfoList;
+	}
+	
+	public void updateShow(final String showId) {
+		String apiUrl = REST_URL + "episodeinfo.php?sid=" + showId;		
+		AsyncHttpResponseHandler respHandlr = new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response)  {
 				Log.d("DEBUG", "In onSuccess" + response);
+
+				if(response.contains(TvRageError)) {
+					if(ShowsModelSingleton.getInstance().getErrorCountForShowId(showId) < TvRageErrorNumRetries) {
+						ShowsModelSingleton.getInstance().incrementErrorCountForShowId(showId);
+						Log.d("DEBUG", "Show api request for showId" + showId + " got error " + ShowsModelSingleton.getInstance().getErrorCountForShowId(showId));
+						updateShow(showId);
+					}
+					else {
+						Log.d("DEBUG", "ERROR: Exceeding retried for showId" + showId);
+						return;
+						
+					}
+				}
+				else {
+					Log.d("DEBUG", "Show api request succeeded, clearing map for showId" + showId);
+					ShowsModelSingleton.getInstance().clearErrorCountForShowId(showId);
+				}
+
 				InputStream stream = null;
 				try {
 					MyShowParser showParser = new MyShowParser();
-					InputStream in = new ByteArrayInputStream(response.toString().getBytes());
-					ShowInfo showInfo = showParser.parse(in);
-					showInfo.printProperties();
-					showInfoList.add(showInfo);
+					InputStream in = new ByteArrayInputStream(response.getBytes());
+					ShowInfo newShowInfo = showParser.parse(in);
+					newShowInfo.setId(showId);
+					newShowInfo.printProperties();
+					ShowsModelSingleton singleton = ShowsModelSingleton.getInstance();
+					//singleton.addShowInfo(newShowInfo);
+					singleton.updateShowInfo(newShowInfo);
+
 
 				}catch(Exception e) {
-					Log.d("DEBUG", "Exception in inner loop");
-					
 					e.printStackTrace();
 				}
 				finally {
@@ -84,62 +110,23 @@ public class RestClient
 						}catch(IOException ie) { ie.printStackTrace();}
 					}
 				}
-
 			}
 
-			catch(Exception e) {
-				Log.d("DEBUG", "Exception in getting show" + e);
-				e.printStackTrace();
+			@Override
+			public void onFailure(Throwable error) {
+				Log.d("DEBUG", "In onFailure" + error.getMessage());
+				error.printStackTrace();
+				ShowsModelSingleton.getInstance().clearErrorCountForShowId(showId);
 			}
-*/
+		};
+		getAndHandleClientReponse(apiUrl, respHandlr);
 
-
-
-			
-			AsyncHttpResponseHandler respHandlr = new AsyncHttpResponseHandler() {
-				@Override
-				public void onSuccess(String response) {
-					Log.d("DEBUG", "In onSuccess" + response);
-					InputStream stream = null;
-					try {
-						MyShowParser showParser = new MyShowParser();
-						InputStream in = new ByteArrayInputStream(response.getBytes());
-						ShowInfo newShowInfo = showParser.parse(in);
-						newShowInfo.printProperties();
-						ShowsModelSingleton singleton = ShowsModelSingleton.getInstance();
-						singleton.addShowInfo(newShowInfo);
-						//updateShowInfo(newShowInfo);
-
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
-					finally {
-						if (stream != null) {
-							try {
-								stream.close();
-							}catch(IOException ie) { ie.printStackTrace();}
-						}
-					}
-				}
-
-				@Override
-				public void onFailure(Throwable error) {
-					Log.d("DEBUG", "In onFailure" + error.getMessage());
-					error.printStackTrace();
-				}
-			};
-			getAndHandleClientReponse(apiUrl, respHandlr);
-			
-	
-		}
-		//Log.d("DEBUG", "Return the length of showInfoList" + showInfoList.size());
-		//return showInfoList;
 	}
 
 	public void updateShowInfo(ShowInfo showInfo) {
 		Log.d("DEBUG", "In updateShowInfo!!!");
 		showInfo.printProperties();
 	}
-	
+
 }
 

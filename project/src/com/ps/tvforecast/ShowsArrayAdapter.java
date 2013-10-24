@@ -17,6 +17,27 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> {
 		super(context, R.layout.simple_text_view, showResults);
 	}
 	
+	public void update(ShowInfo showInfo) {
+		ShowInfo match = getShowInfo(showInfo.getId());
+		Log.d("DEBUG", "After getShowInfo in ShowsArrayAdapter");
+		if(match !=null) {
+			match.updateShowInfo(showInfo);
+			Log.d("DEBUG", "After match in update "+ match.getAsString());
+			this.notifyDataSetChanged();
+		}
+	}
+	
+	public ShowInfo getShowInfo(String id) {
+		Log.d("DEBUG", "ShowsArrayAdapter getCount" + this.getCount());
+		for(int i=0; i < this.getCount(); i++) {
+			ShowInfo curItem = getItem(i);
+			Log.d("DEBUG", "ShowsArrayAdapter curItemId" + curItem.getId() + "looking for " + id);
+			if(curItem.getId().equals(id)) {
+				return curItem;
+			}
+		}
+		return null;
+	}
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

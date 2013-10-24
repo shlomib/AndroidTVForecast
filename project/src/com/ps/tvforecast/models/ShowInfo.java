@@ -34,6 +34,13 @@ public  class ShowInfo {
     
     Map<String, String> properties = new HashMap<String, String>();
     
+    public String getId() {
+    	return getPropertyByName(SHOW_ID);
+    }
+    
+    public void setId(String id) {
+    	setPropertyByName(SHOW_ID, id);
+    }
     
     public ShowInfo(Map<String, String> properties) {
     	this.properties = properties;
@@ -85,6 +92,18 @@ public  class ShowInfo {
     	}
     	return ret;
     	
+    }
+    
+   
+    public void updateShowInfo(ShowInfo showInfo) {
+    	Map<String, String> showInfoProperties = showInfo.properties;
+    	Log.d("DEBUG", "Trying to update to id " + showInfo.getId());
+    	for(String key:showInfoProperties.keySet()) {
+    		if(!key.equalsIgnoreCase("SHOW_ID")) {
+    			this.properties.put(key, showInfoProperties.get(key));
+    			Log.d("DEBUG", "Copy " +  showInfoProperties.get(key));
+    		}
+    	}
     }
     
     
