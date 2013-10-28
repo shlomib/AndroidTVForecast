@@ -5,9 +5,11 @@ package com.ps.tvforecast.parsers;
  */
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +28,10 @@ import com.ps.tvforecast.models.ShowInfo;
 public class MyShowParser {
     private static final String ns = null;
    
+    private static final String SHOW_ID_TAG = "showid";
+    public static final String RESULTS_TAG = "Results";
+    public static final String SHOW_TAG = "show";
+    
     private static final String SHOW_LATEST_EPISODE_TAG = "latestepisode";
     private static final String SHOW_NEXT_EPISODE_TAG = "nextepisode";
     private static final String SHOW_EPISODE_DATE_TAG = "airdate";
@@ -38,7 +44,7 @@ public class MyShowParser {
     // Ref http://services.tvrage.com/feeds/episodeinfo.php?sid=8511
     private Set<String> simpleShowElementTags = new HashSet<String>( 
     		Arrays.asList(new String[] {
-    				ShowInfo.SHOW_NAME,ShowInfo.SHOW_STATUS,ShowInfo.SHOW_COUNTRY, ShowInfo.SHOW_STARTED, ShowInfo.SHOW_LINK
+    				ShowInfo.SHOW_NAME,ShowInfo.SHOW_STATUS,ShowInfo.SHOW_COUNTRY, ShowInfo.SHOW_STARTED, ShowInfo.SHOW_LINK, ShowInfo.SHOW_ENDED
     		})
     		);
     
@@ -53,7 +59,7 @@ public class MyShowParser {
     
 
     // We don't use namespaces
-    public ShowInfo parse(InputStream in) throws XmlPullParserException, IOException {
+    public ShowInfo parseShow(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -64,21 +70,65 @@ public class MyShowParser {
             in.close();
         }
     }
+    
+ // We don't use namespaces
+    public List<ShowInfo> parseResults(InputStream in) throws XmlPullParserException, IOException {
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(in, null);
+            parser.nextTag();
+            return readResultsShowList(parser);
+        } finally {
+            in.close();
+        }
+    }
 
-    // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them
+    // Parses the contents of a results list of show entities. If it encounters a show hands it
     // off
-    // to their respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
-    private ShowInfo readShow(XmlPullParser parser) throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, ns, ShowInfo.SHOW);
-		Map<String, String> properties = new HashMap<String, String>();
-		
+    // to its respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
+    private List<ShowInfo> readResultsShowList(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, RESULTS_TAG);
+        List<ShowInfo> showInfos = new ArrayList<ShowInfo>();
+        
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String elementName = parser.getName();
+    
+            // read the show info
+            if(elementName.equals(SHOW_TAG)) {
+                showInfos.add(readShow(parser));
+            }
+            else {
+                skip(parser);
+            }
+        }
+        
+        return showInfos;
+    }
+    
+    // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them
+    // off
+    // to their respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
+    private ShowInfo readShow(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, SHOW_TAG);
+		Map<String, String> properties = new HashMap<String, String>();
+		
+		while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+        
+            String elementName = parser.getName();
+            
+            //this will read the show id and store it appropriately
+            if(parser.getName().equalsIgnoreCase(SHOW_TAG)) {
+                properties.put(ShowInfo.SHOW_ID, parser.getAttributeValue(ns, ShowInfo.SHOW_ID));
+            }
             //This will read and put all the simple tags for Show info
-            if (  simpleShowElementTags.contains(elementName) ) {
+            else if (  simpleShowElementTags.contains(elementName) ) {
                 String value = readString(parser, elementName);
                 properties.put(elementName, value);
             }

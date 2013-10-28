@@ -14,13 +14,13 @@ import android.util.Log;
 public  class ShowInfo {
 	
     //properties of show
-    public static final String SHOW = "show";
     public static final String SHOW_ID = "id";
     public static final String SHOW_NAME = "name";
     public static final String SHOW_STATUS = "status";
     public static final String SHOW_COUNTRY = "country";
     public static final String SHOW_STARTED = "started";
     public static final String SHOW_LINK = "link";
+    public static final String SHOW_ENDED = "ended";
     
     public static final String SHOW_LATEST_EPISODE_DATE = "latestepisode_airdate";
     public static final String SHOW_LATEST_EPISODE_TITLE = "latestepisode_title";
