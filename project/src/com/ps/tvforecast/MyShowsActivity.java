@@ -7,7 +7,10 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -28,7 +31,7 @@ public class MyShowsActivity extends Activity {
 		setContentView(R.layout.activity_my_shows);
 		showInfoList.clear();
 		ShowsModelSingleton.initInstance(getApplicationContext());
-		initializeModels();
+		//initializeModels();
 		restClient.getShows(ShowsModelSingleton.getInstance().getShowIds());
 		lvShowList = (ListView) findViewById(R.id.lvShowList);
     	
@@ -54,6 +57,9 @@ public class MyShowsActivity extends Activity {
 		ShowInfo modernF = new ShowInfo(properties2);
 		ShowsModelSingleton.getInstance().addShowInfo(modernF);
 		
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		String showname = pref.getString("showname", "n/a");
+		Log.d("DB", showname);
 	}
 
 	@Override

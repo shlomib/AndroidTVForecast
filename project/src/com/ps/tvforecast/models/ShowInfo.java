@@ -1,18 +1,18 @@
 package com.ps.tvforecast.models;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import android.util.Log;
 
 // This class represents a single entry (post) in the XML feed.
 // Model for show XML : http://services.tvrage.com/feeds/episodeinfo.php?sid=8511
 // It includes the data members for show
-public  class ShowInfo {
+public  class ShowInfo implements Serializable {
 	
+    private static final long serialVersionUID = 8149147469720945079L;
+    
     //properties of show
     public static final String SHOW_ID = "id";
     public static final String SHOW_NAME = "name";
