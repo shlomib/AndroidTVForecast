@@ -90,7 +90,6 @@ public class ShowsModelSingleton {
     try {
         oos = new ObjectOutputStream(baos);
         oos.writeObject(showInfoList);
-        //oos.writeObject(showInfoList.get(0));
     } catch (IOException e) {
         e.printStackTrace();
     } finally {
@@ -132,7 +131,6 @@ public class ShowsModelSingleton {
           ois = new ObjectInputStream(bais);
 
           showInfoList = (ArrayList<ShowInfo>)ois.readObject();
-          //showInfoList.add((ShowInfo)ois.readObject());
         } catch (OptionalDataException e) {
             Log.d("DEBUG", "ERR1: ", e);
             e.printStackTrace();
@@ -165,7 +163,6 @@ public class ShowsModelSingleton {
   }
   
   public Integer getErrorCountForShowId(String showId) {
-	 
 	  return  (mapFor2xxError.containsKey(showId)? mapFor2xxError.get(showId): 0);
   }
   

@@ -31,7 +31,7 @@ public class SearchShowResultsArrayAdapter extends ArrayAdapter<ShowInfo> {
 		}
 		String showInfoStr = showInfo.getAsString();
 		tvShowInfo.setText(showInfoStr);
-		Log.d("DEBUG", "--- In SearchShowResultsArrayAdapter " + showInfoStr );
+		Log.d("DEBUG", "--- In SearchShowResultsArrayAdapter: " + showInfoStr);
 		return tvShowInfo;
 	}
 }

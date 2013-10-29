@@ -42,6 +42,30 @@ public  class ShowInfo implements Serializable {
     	setPropertyByName(SHOW_ID, id);
     }
     
+    public String getName() {
+        return getPropertyByName(SHOW_NAME);
+    }
+    
+    public String getStatus() {
+        return getPropertyByName(SHOW_STATUS);
+    }
+    
+    public String getCountry() {
+        return getPropertyByName(SHOW_COUNTRY);
+    }
+    
+    public String getStarted() {
+        return getPropertyByName(SHOW_STARTED);
+    }
+    
+    public String getNextEpisodeNumber() {
+        return getPropertyByName(SHOW_NEXT_EPISODE_NUMBER);
+    }
+    
+    public String getNextEpisodeDate() {
+        return getPropertyByName(SHOW_NEXT_EPISODE_DATE);
+    }
+    
     public ShowInfo(Map<String, String> properties) {
     	this.properties = properties;
     }

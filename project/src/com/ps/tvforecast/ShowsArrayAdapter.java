@@ -49,13 +49,10 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> {
 		}
 		else {
 			tvShowInfo = (TextView) convertView;
-			
 		}
 		String showInfoStr = showInfo.getAsString();
 		tvShowInfo.setText(showInfoStr);
 		Log.d("DEBUG", "--- In ShowsArrayAdapter " + showInfoStr );
 		return tvShowInfo;
 	}
-	
-	
 }

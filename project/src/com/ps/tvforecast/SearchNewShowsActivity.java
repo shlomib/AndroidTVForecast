@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -39,6 +36,10 @@ public class SearchNewShowsActivity extends Activity {
         ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
         lvShowResults.setAdapter(ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter());
         
+        initEventListeners();
+    }
+    
+    private void initEventListeners() {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,8 +71,9 @@ public class SearchNewShowsActivity extends Activity {
         ShowInfo showToAdd = ShowsModelSingleton.getInstance().getShowInfoSearchResults().get(pos);
         
         //if show is not already in my shows list, then add it and go back to main view
-        if(showToAdd != null && !ShowsModelSingleton.getInstance().getShowIds().contains(showToAdd.getId())) {
+        if(showToAdd != null && showToAdd.getId() != null && !ShowsModelSingleton.getInstance().getShowIds().contains(showToAdd.getId())) {
             ShowsModelSingleton.getInstance().addShowInfo(showToAdd);
+            ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
             
             // closes the activity, returns to parent
             this.finish();

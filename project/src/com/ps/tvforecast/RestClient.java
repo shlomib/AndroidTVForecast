@@ -38,31 +38,31 @@ public class RestClient {
 	 * EX: http://services.tvrage.com/feeds/episodeinfo.php?sid=8052
 	 
     	<show id="8511">
-        <name>The Big Bang Theory</name>
-        <link>http://www.tvrage.com/The_Big_Bang_Theory</link>
-        <started>2007-09-24</started>
-        <ended/>
-        <country>USA</country>
-        <status>Returning Series</status>
-        <classification>Scripted</classification>
-        <genres>
-            <genre>Comedy</genre>
-        </genres>
-        <airtime>Thursday at 08:00 pm</airtime>
-        <runtime>30</runtime>
-        <latestepisode>
-            <number>07x05</number>
-            <title>The Workplace Proximity</title>
-            <airdate>2013-10-17</airdate>
-        </latestepisode>
-        <nextepisode>
-            <number>07x06</number>
-            <title>The Romance Resonance</title>
-            <airdate>2013-10-24</airdate>
-            <airtime format="RFC3339">2013-10-24T20:00:00-4:00</airtime>
-            <airtime format="GMT+0 NODST">1382652000</airtime>
-        </nextepisode>
-    </show>
+            <name>The Big Bang Theory</name>
+            <link>http://www.tvrage.com/The_Big_Bang_Theory</link>
+            <started>2007-09-24</started>
+            <ended/>
+            <country>USA</country>
+            <status>Returning Series</status>
+            <classification>Scripted</classification>
+            <genres>
+                <genre>Comedy</genre>
+            </genres>
+            <airtime>Thursday at 08:00 pm</airtime>
+            <runtime>30</runtime>
+            <latestepisode>
+                <number>07x05</number>
+                <title>The Workplace Proximity</title>
+                <airdate>2013-10-17</airdate>
+            </latestepisode>
+            <nextepisode>
+                <number>07x06</number>
+                <title>The Romance Resonance</title>
+                <airdate>2013-10-24</airdate>
+                <airtime format="RFC3339">2013-10-24T20:00:00-4:00</airtime>
+                <airtime format="GMT+0 NODST">1382652000</airtime>
+            </nextepisode>
+        </show>
     */
 	
 	public void getLatestShowInfoWithEpisodeDetails(final String showId) {
@@ -98,7 +98,6 @@ public class RestClient {
 					newShowInfo.printProperties();
 					ShowsModelSingleton.getInstance().updateShowInfo(newShowInfo);
 
-
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -106,7 +105,9 @@ public class RestClient {
 					if (stream != null) {
 						try {
 							stream.close();
-						}catch(IOException ie) { ie.printStackTrace();}
+						} catch(IOException ie) {
+						    ie.printStackTrace();
+						}
 					}
 				}
 			}
@@ -126,37 +127,37 @@ public class RestClient {
      * EX: http://services.tvrage.com/feeds/episodeinfo.php?sid=8052
      
         <Results>
-    <show>
-        <showid>25056</showid>
-        <name>The Walking Dead</name>
-        <link>http://www.tvrage.com/The_Walking_Dead</link>
-        <country>US</country>
-        <started>2010</started>
-        <ended>0</ended>
-        <seasons>4</seasons>
-        <status>Returning Series</status>
-        <genres>
-            <genre>Action</genre>
-            <genre>Drama</genre>
-            <genre>Horror/Supernatural</genre>
-            <genre>Thriller</genre>
-        </genres>
-    </show>
-    <show>
-        <showid>8052</showid>
-        <name>Walking The Bible</name>
-        <link>http://www.tvrage.com/shows/id-8052</link>
-        <country>US</country>
-        <started>2006</started>
-        <ended>2006</ended>
-        <seasons>1</seasons>
-        <status>Canceled/Ended</status>
-        <classification>Documentary</classification>
-        <genres>
-            <genre>Mystery</genre>
-        </genres>
-    </show>
-</results>
+            <show>
+                <showid>25056</showid>
+                <name>The Walking Dead</name>
+                <link>http://www.tvrage.com/The_Walking_Dead</link>
+                <country>US</country>
+                <started>2010</started>
+                <ended>0</ended>
+                <seasons>4</seasons>
+                <status>Returning Series</status>
+                <genres>
+                    <genre>Action</genre>
+                    <genre>Drama</genre>
+                    <genre>Horror/Supernatural</genre>
+                    <genre>Thriller</genre>
+                </genres>
+            </show>
+            <show>
+                <showid>8052</showid>
+                <name>Walking The Bible</name>
+                <link>http://www.tvrage.com/shows/id-8052</link>
+                <country>US</country>
+                <started>2006</started>
+                <ended>2006</ended>
+                <seasons>1</seasons>
+                <status>Canceled/Ended</status>
+                <classification>Documentary</classification>
+                <genres>
+                    <genre>Mystery</genre>
+                </genres>
+            </show>
+        </results>
     */
     
     public void searchForShow(final String queryStr) {
@@ -205,7 +206,7 @@ public class RestClient {
 
             @Override
             public void onFailure(Throwable error) {
-                Log.d("DEBUG", "In onFailure" + error.getMessage());
+                Log.d("DEBUG", "searchForShow::onFailure() " + error.getMessage());
                 error.printStackTrace();
                 ShowsModelSingleton.getInstance().clearErrorCountForShowId(queryStr);
             }

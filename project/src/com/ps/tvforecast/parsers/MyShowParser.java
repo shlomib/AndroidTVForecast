@@ -127,8 +127,12 @@ public class MyShowParser {
             if(parser.getName().equalsIgnoreCase(SHOW_TAG)) {
                 properties.put(ShowInfo.SHOW_ID, parser.getAttributeValue(ns, ShowInfo.SHOW_ID));
             }
+            else if(parser.getName().equalsIgnoreCase(SHOW_ID_TAG)) {
+                String value = readString(parser, elementName);
+                properties.put(ShowInfo.SHOW_ID, value);
+            }
             //This will read and put all the simple tags for Show info
-            else if (  simpleShowElementTags.contains(elementName) ) {
+            else if (simpleShowElementTags.contains(elementName) ) {
                 String value = readString(parser, elementName);
                 properties.put(elementName, value);
             }
@@ -155,11 +159,9 @@ public class MyShowParser {
     private Map<String, String> readEpisodeProperties(String episodeType,
     		Set<String> episodeProperties, XmlPullParser parser) 
     				throws IOException, XmlPullParserException  {
-    	Map<String, String> retProperties = new HashMap<String, String> ();
     	
-		
-        parser.require(XmlPullParser.START_TAG, ns, episodeType);
-		Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> retProperties = new HashMap<String, String> ();
+    	parser.require(XmlPullParser.START_TAG, ns, episodeType);
 		
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
