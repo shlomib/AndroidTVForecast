@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
 import com.ps.tvforecast.models.ShowInfo;
@@ -28,6 +31,8 @@ public class MyShowsActivity extends Activity {
 		restClient.getShows(ShowsModelSingleton.getInstance().getShowIds());
 		lvShowList = (ListView) findViewById(R.id.lvShowList);
 		lvShowList.setAdapter(ShowsModelSingleton.getInstance().getShowsArrayAdapter());
+		
+		initEventListeners();
 	}
 
 	@Override
@@ -39,6 +44,17 @@ public class MyShowsActivity extends Activity {
 	public void onClickSearchShows(MenuItem mi) {
         Intent i = new Intent(MyShowsActivity.this, SearchNewShowsActivity.class);
 	    startActivity(i);
+	}
+	
+	private void initEventListeners() {
+	    lvShowList.setOnItemLongClickListener(new OnItemLongClickListener() {
+	        @Override
+	        public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long rowId) {
+	            ShowInfo selectedShow = ShowsModelSingleton.getInstance().getShowInfoList().get(pos);
+	            ShowsModelSingleton.getInstance().getShowsArrayAdapter().delete(selectedShow.getId());
+	            return true;
+	        }
+	    });
 	}
 
 }

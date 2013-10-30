@@ -12,6 +12,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.ps.tvforecast.models.ShowInfo;
 import com.ps.tvforecast.models.ShowsModelSingleton;
@@ -23,6 +24,7 @@ public class SearchNewShowsActivity extends Activity {
     EditText etShowName;
     Button btnSearch;
     ListView lvShowResults;
+    public ProgressBar pbSearchProgress;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +34,12 @@ public class SearchNewShowsActivity extends Activity {
         etShowName = (EditText) findViewById(R.id.etShowName);
         btnSearch = (Button) findViewById(R.id.btnSearch);
         lvShowResults = (ListView) findViewById(R.id.lvShowResults);
+        pbSearchProgress = (ProgressBar) findViewById(R.id.pbSearchProgress);
         
         ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
         lvShowResults.setAdapter(ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter());
+        
+        pbSearchProgress.setVisibility(View.INVISIBLE);
         
         initEventListeners();
     }
@@ -46,8 +51,9 @@ public class SearchNewShowsActivity extends Activity {
                 String showName = etShowName.getText().toString();
                 
                 if(!showName.equals("")) {
+                    pbSearchProgress.setVisibility(View.VISIBLE);
                     ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
-                    restClient.searchForShow(showName);
+                    restClient.searchForShow(showName, pbSearchProgress);
                 }
             }
         });
@@ -74,6 +80,7 @@ public class SearchNewShowsActivity extends Activity {
         if(showToAdd != null && showToAdd.getId() != null && !ShowsModelSingleton.getInstance().getShowIds().contains(showToAdd.getId())) {
             ShowsModelSingleton.getInstance().addShowInfo(showToAdd);
             ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
+            restClient.getLatestShowInfoWithEpisodeDetails(showToAdd.getId());
             
             // closes the activity, returns to parent
             this.finish();

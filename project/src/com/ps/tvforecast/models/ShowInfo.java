@@ -1,7 +1,12 @@
 package com.ps.tvforecast.models;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import android.util.Log;
@@ -27,6 +32,8 @@ public  class ShowInfo implements Serializable {
     public static final String SHOW_LATEST_EPISODE_NUMBER = "latestepisode_number";
     
     public static final String SHOW_NEXT_EPISODE_DATE = "nextepisode_airdate";
+    public static final String SHOW_NEXT_EPISODE_TIME_RFC = "nextepisode_airtime_RFC";
+    public static final String SHOW_NEXT_EPISODE_TIME_GMT = "nextepisode_airtime_GMT";
     public static final String SHOW_NEXT_EPISODE_TITLE = "nextepisode_title";
     public static final String SHOW_NEXT_EPISODE_NUMBER = "nextepisode_number";
     
@@ -58,12 +65,20 @@ public  class ShowInfo implements Serializable {
         return getPropertyByName(SHOW_STARTED);
     }
     
+    public String getNextEpisodeTitle() {
+        return getPropertyByName(SHOW_NEXT_EPISODE_TITLE);
+    }
+    
     public String getNextEpisodeNumber() {
         return getPropertyByName(SHOW_NEXT_EPISODE_NUMBER);
     }
     
     public String getNextEpisodeDate() {
         return getPropertyByName(SHOW_NEXT_EPISODE_DATE);
+    }
+    
+    public String getNextEpisodeTime() {
+        return getPropertyByName(SHOW_NEXT_EPISODE_TIME_RFC);
     }
     
     public ShowInfo(Map<String, String> properties) {
@@ -97,24 +112,55 @@ public  class ShowInfo implements Serializable {
     }
     
     public String getAsString() {
-    	String ret = "";
-    	String showName = this.getPropertyByName(SHOW_NAME);
-    	String nextExpisodeNum =  this.getPropertyByName(SHOW_NEXT_EPISODE_NUMBER);
-    	String nextExpisodeTitle = this.getPropertyByName(SHOW_NEXT_EPISODE_TITLE);
-    	String nextEpisodeDate = this.getPropertyByName(SHOW_NEXT_EPISODE_DATE);
+        StringBuilder ret = new StringBuilder();
+    	String showName = this.getName();
+    	String nextExpisodeNum =  this.getNextEpisodeNumber();
+    	String nextExpisodeTitle = this.getNextEpisodeTitle();
+    	//String nextEpisodeTime = this.getNextEpisodeTime();
+    	
+    	String nextEpisodeDate;;
+    	String nextEpisodeTime;
+    	
+    	try {
+    	    //nextEpisodeTime = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a", Locale.US).format(new java.util.Date(Long.parseLong(this.getNextEpisodeTime()))); 
+    	    //nextEpisodeTime = parseRFC3339Date(this.getNextEpisodeTime()).toString();
+    	    Date parsedDate = parseRFC3339Date(this.getNextEpisodeTime());
+    	    if(parsedDate != null) {
+    	        nextEpisodeDate = new SimpleDateFormat("EEEE, MMMM d h:mm a", Locale.US).format(parsedDate);
+    	    }
+    	    else {
+    	        nextEpisodeDate = "";
+    	    }
+    	} catch (IndexOutOfBoundsException obe) {
+    	    obe.printStackTrace();
+    	    Log.d("ERROR", obe.getMessage());
+    	    nextEpisodeDate = "";
+        } catch (ParseException pe) {
+            pe.printStackTrace();
+            Log.d("ERROR", pe.getMessage());
+            nextEpisodeDate = "";
+        }
+    	
+    	//nextEpisodeTime = getTimeLabel(this.getNextEpisodeTime());
+    	//nextEpisodeTime = getTimeLabel(getPropertyByName(SHOW_NEXT_EPISODE_TIME_RFC));
+    	nextEpisodeTime = "";
+    	
     	if(showName!=null) {
-    	ret += showName + "\n";
+    	    ret.append(showName + "\n");
     	}
     	if(nextExpisodeNum!=null) {
-    	ret += nextExpisodeNum + "\n";
+    	    ret.append(nextExpisodeNum + "\n");
     	}
     	if(nextExpisodeTitle!=null) {
-    		ret += nextExpisodeTitle + "\n";
+    	    ret.append(nextExpisodeTitle + "\n");
     	}
     	if(nextEpisodeDate!=null) {
-    		ret += SHOW_NEXT_EPISODE_DATE;
+    	    ret.append(nextEpisodeDate + "\n");
     	}
-    	return ret;
+        if(nextEpisodeTime!=null) {
+            ret.append(nextEpisodeTime + "\n");
+        }
+    	return ret.toString();
     	
     }
     
@@ -130,5 +176,66 @@ public  class ShowInfo implements Serializable {
     	}
     }
     
+    private String getTimeLabel(String datestring) {
+        Calendar c0 = Calendar.getInstance(); // today
+        
+        Calendar c1 = Calendar.getInstance();
+        c1.add(Calendar.DAY_OF_YEAR, -1); // yesterday
+
+        Calendar c2 = Calendar.getInstance();
+        c2.setTime(new Date(datestring)); // your date
+
+        if (c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+          && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)) {
+            return "YESTERDAY";
+        }
+        else if (c0.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+                && c0.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)) {
+                  return "TODAY";
+              }
+        else {
+            return "N/A";
+        }
+    }
+    
+    private static Date parseRFC3339Date(String datestring) throws java.text.ParseException, IndexOutOfBoundsException {
+        if(datestring == null) {
+            return null;
+        }
+        
+        Date d = new Date();
+
+        //if there is no time zone, we don't need to do any special parsing.
+        if(datestring.endsWith("Z")){
+          try{
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");//spec for RFC3339                    
+            d = s.parse(datestring);          
+          }
+          catch(java.text.ParseException pe){//try again with optional decimals
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");//spec for RFC3339 (with fractional seconds)
+            s.setLenient(true);
+            d = s.parse(datestring);          
+          }
+          return d;
+        }
+
+             //step one, split off the timezone. 
+        String firstpart = datestring.substring(0,datestring.lastIndexOf('-'));
+        String secondpart = datestring.substring(datestring.lastIndexOf('-'));
+            
+              //step two, remove the colon from the timezone offset
+        secondpart = secondpart.substring(0,secondpart.indexOf(':')) + secondpart.substring(secondpart.indexOf(':')+1);
+        datestring  = firstpart + secondpart;
+        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");//spec for RFC3339      
+        try{
+          d = s.parse(datestring);        
+        }
+        catch(java.text.ParseException pe){//try again with optional decimals
+          s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");//spec for RFC3339 (with fractional seconds)
+          s.setLenient(true);
+          d = s.parse(datestring);        
+        }
+        return d;
+      }
     
 }

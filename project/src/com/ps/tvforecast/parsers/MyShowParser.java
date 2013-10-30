@@ -35,8 +35,7 @@ public class MyShowParser {
     private static final String SHOW_LATEST_EPISODE_TAG = "latestepisode";
     private static final String SHOW_NEXT_EPISODE_TAG = "nextepisode";
     private static final String SHOW_EPISODE_DATE_TAG = "airdate";
-    // TODO Pri extract based on attribute
-    //private static final String SHOW_EPISODE_TIME_TAG = "airtime";
+    private static final String SHOW_EPISODE_TIME_TAG = "airtime";
     private static final String SHOW_EPISODE_TITLE_TAG = "title";
     private static final String SHOW_EPISODE_NUMBER_TAG = "number";
     
@@ -51,11 +50,11 @@ public class MyShowParser {
     private Set<String> episodeElementTags = new HashSet<String>( 
     		Arrays.asList(new String[] {
     				SHOW_EPISODE_DATE_TAG,
-    				//SHOW_EPISODE_TIME_TAG, // TODO @ Pri uncomment later to get time
+    				SHOW_EPISODE_TIME_TAG,
     				SHOW_EPISODE_TITLE_TAG, 
     				SHOW_EPISODE_NUMBER_TAG
     		})
-    		);
+    	);
     
 
     // We don't use namespaces
@@ -71,7 +70,7 @@ public class MyShowParser {
         }
     }
     
- // We don't use namespaces
+    // We don't use namespaces
     public List<ShowInfo> parseResults(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -168,11 +167,21 @@ public class MyShowParser {
                 continue;
             }
             String elementName = parser.getName();
+            String extra = "";
             //This will read and put all the simple tags for Show info
-            if (  episodeProperties.contains(elementName) ) {
+            if (episodeProperties.contains(elementName)) {
+                if(elementName.equalsIgnoreCase(SHOW_EPISODE_TIME_TAG)) {
+                    if(parser.getAttributeValue(ns, "format").equalsIgnoreCase("RFC3339")) {
+                        extra = "_RFC";
+                    }
+                    else {
+                        extra = "_GMT";
+                    }
+                }
+                
                 String value = readString(parser, elementName);
                 //key is episodeType + "_" + elementName
-                String keyName = new StringBuilder().append(episodeType).append("_").append(elementName).toString();
+                String keyName = new StringBuilder().append(episodeType).append("_").append(elementName).append(extra).toString();
                 retProperties.put(keyName, value);
             }
             else {

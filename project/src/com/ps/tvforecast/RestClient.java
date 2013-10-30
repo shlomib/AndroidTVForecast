@@ -7,6 +7,8 @@ import java.util.List;
 
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -26,7 +28,6 @@ public class RestClient {
 		client.get( apiUrl, responseHndlr);
 		
 	}
-
 
 	public void getShows(List<String> showIdList) {
 		for(String showId : showIdList) {
@@ -81,7 +82,6 @@ public class RestClient {
 					else {
 						Log.d("DEBUG", "ERROR: Exceeding retried for showId: " + showId);
 						return;
-						
 					}
 				}
 				else {
@@ -160,9 +160,10 @@ public class RestClient {
         </results>
     */
     
-    public void searchForShow(final String queryStr) {
+    public void searchForShow(final String queryStr, final ProgressBar pb) {
         String apiUrl = REST_URL + "search.php?show=" + Uri.encode(queryStr);
         AsyncHttpResponseHandler respHandlr = new AsyncHttpResponseHandler() {
+            
             @Override
             public void onSuccess(String response)  {
                 Log.d("DEBUG", "searchForShow::onSuccess()" + response);
@@ -171,7 +172,7 @@ public class RestClient {
                     if(ShowsModelSingleton.getInstance().getErrorCountForShowId(queryStr) < TvRageErrorNumRetries) {
                         ShowsModelSingleton.getInstance().incrementErrorCountForShowId(queryStr);
                         Log.d("DEBUG", "Show api request search for show [" + queryStr + "] got error " + ShowsModelSingleton.getInstance().getErrorCountForShowId(queryStr));
-                        searchForShow(queryStr);
+                        searchForShow(queryStr, pb);
                     }
                     else {
                         Log.d("DEBUG", "ERROR: Exceeding retried for search show: " + queryStr);
@@ -183,10 +184,10 @@ public class RestClient {
                     ShowsModelSingleton.getInstance().clearErrorCountForShowId(queryStr);
                 }
 
-                InputStream stream = null;
+                InputStream in = null;
                 try {
                     MyShowParser showParser = new MyShowParser();
-                    InputStream in = new ByteArrayInputStream(response.getBytes());
+                    in = new ByteArrayInputStream(response.getBytes());
                     List<ShowInfo> foundShowInfos = showParser.parseResults(in);
                     Log.d("DEBUG", "searchForShow::onSuccess() " + String.valueOf(foundShowInfos.size()));
                     ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
@@ -196,11 +197,15 @@ public class RestClient {
                     e.printStackTrace();
                 }
                 finally {
-                    if (stream != null) {
+                    if (in != null) {
                         try {
-                            stream.close();
-                        }catch(IOException ie) { ie.printStackTrace();}
+                            in.close();
+                        } catch(IOException ie) {
+                            ie.printStackTrace();
+                        }
                     }
+
+                    pb.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -209,6 +214,7 @@ public class RestClient {
                 Log.d("DEBUG", "searchForShow::onFailure() " + error.getMessage());
                 error.printStackTrace();
                 ShowsModelSingleton.getInstance().clearErrorCountForShowId(queryStr);
+                pb.setVisibility(View.INVISIBLE);
             }
         };
         getAndHandleClientReponse(apiUrl, respHandlr);

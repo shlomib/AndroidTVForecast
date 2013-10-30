@@ -19,13 +19,22 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> {
 	
 	public void update(ShowInfo showInfo) {
 		ShowInfo match = getShowInfo(showInfo.getId());
-		Log.d("DEBUG", "After getShowInfo in ShowsArrayAdapter");
+		Log.d("DEBUG", "After update in ShowsArrayAdapter");
 		if(match !=null) {
 			match.updateShowInfo(showInfo);
 			Log.d("DEBUG", "After match in update "+ match.getAsString());
 			this.notifyDataSetChanged();
 		}
 	}
+	
+	public void delete(String id) {
+        ShowInfo match = getShowInfo(id);
+        Log.d("DEBUG", "After remove in ShowsArrayAdapter");
+        if(match !=null) {
+            this.remove(match);
+            Log.d("DEBUG", "After match in remove "+ match.getAsString());
+        }
+    }
 	
 	public ShowInfo getShowInfo(String id) {
 		Log.d("DEBUG", "ShowsArrayAdapter getCount" + this.getCount());
