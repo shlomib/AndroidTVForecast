@@ -3,6 +3,7 @@ package com.ps.tvforecast.models;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,18 +37,46 @@ public  class ShowInfo implements Serializable {
     public static final String SHOW_NEXT_EPISODE_TITLE = "nextepisode_title";
     public static final String SHOW_NEXT_EPISODE_NUMBER = "nextepisode_number";
     
-    //TODO @ Pri extract <airtime format="GMT+0 NODST">1382652000</airtime> to get time
+    public static enum Schedule {
+        TODAY(1, "Today"),
+        TOMORROW(2, "Tomorrow"),
+        THIS_WEEK(3, "This Week"),
+        NEXT_WEEK(4, "Next Week"),
+        THIS_MONTH(5, "This Month"),
+        UPCOMING(6, "Upcoming"),
+        TBD(7, "To Be Announced");
+        
+        private final int id;
+        private final String label;
+
+        private Schedule(int id, String label) {
+            this.id = id;
+            this.label = label;
+        }
+
+        public int getId(){
+            return id;
+         }
+        
+        public String toString(){
+           return label;
+        }
+    }
     
     Map<String, String> properties = new HashMap<String, String>();
     
     public Boolean isActive() {
-        if(this.getStatus().toUpperCase().contains("ENDED") ||
-            this.getStatus().toUpperCase().contains("CANCELED") ||
-            this.getStatus().toUpperCase().contains("REJECTED")) {
+        if(this.getStatus().toUpperCase(Locale.US).contains("ENDED") ||
+            this.getStatus().toUpperCase(Locale.US).contains("CANCELED") ||
+            this.getStatus().toUpperCase(Locale.US).contains("REJECTED")) {
             return false;
         }
         
         return true;
+    }
+    
+    public Boolean isTBD() {
+        return this.getStatus().toUpperCase(Locale.US).contains("TBD");
     }
     
     public String getId() {
@@ -90,6 +119,10 @@ public  class ShowInfo implements Serializable {
         return getPropertyByName(SHOW_NEXT_EPISODE_TIME_RFC);
     }
     
+    public String getNextEpisodeTimeMillis() {
+        return getPropertyByName(SHOW_NEXT_EPISODE_TIME_GMT);
+    }
+    
     public ShowInfo(Map<String, String> properties) {
     	this.properties = properties;
     }
@@ -120,37 +153,99 @@ public  class ShowInfo implements Serializable {
     	}
     }
     
+    public String getNextEpisodeDateAsLabel() {
+        String nextEpisodeDateStr = "";
+        
+        Date nextEpisodeDate = getActualNextEpisodeDate();
+        if(nextEpisodeDate != null) {
+            nextEpisodeDateStr = new SimpleDateFormat("EEEE, MMMM d", Locale.US).format(nextEpisodeDate);
+        }
+        
+        return nextEpisodeDateStr;
+    }
+    
+    public String getNextEpisodeTimeAsLabel() {
+        String nextEpisodeTimeStr = "";
+        
+        Date nextEpisodeDate = getActualNextEpisodeDate();
+        if(nextEpisodeDate != null) {
+            nextEpisodeTimeStr = new SimpleDateFormat("h:mm a", Locale.US).format(nextEpisodeDate);
+        }
+        
+        return nextEpisodeTimeStr;
+    }
+    
+    public long getNextEpisodeDaysLeft() {
+        if(this.getNextEpisodeTime() == null || this.getNextEpisodeTime().equalsIgnoreCase("")) {
+            return -1;
+        }
+        
+        Date now = new Date();
+        Date nextEpisodeDate = getActualNextEpisodeDate();
+        
+        if(nextEpisodeDate != null) {
+            return getDateDiff(now, nextEpisodeDate);
+        }
+        
+        return -1;
+    }
+    
+    public Date getActualNextEpisodeDate() {
+        Date nextEpisodeDate = null;
+        try {
+            nextEpisodeDate = parseRFC3339Date(this.getNextEpisodeTime());
+        } catch (IndexOutOfBoundsException obe) {
+            obe.printStackTrace();
+            Log.d("ERROR", obe.getMessage());
+        } catch (ParseException pe) {
+            pe.printStackTrace();
+            Log.d("ERROR", pe.getMessage());
+        }
+        
+        return nextEpisodeDate;
+    }
+    
+    public Schedule getSchedule() {
+        Date now = new Date();
+        Date nextEpisodeDate = getActualNextEpisodeDate();
+        
+        if(nextEpisodeDate == null) {
+            return Schedule.TBD;
+        }
+        else if(getNextEpisodeDaysLeft() == 0) {
+            return Schedule.TODAY;
+        }
+        else if(getNextEpisodeDaysLeft() == 1) {
+            return Schedule.TOMORROW;
+        }
+        else if((this.getYearForDate(now) == this.getYearForDate(nextEpisodeDate)) &&
+                (this.getWeekOfYearForDate(now) == this.getWeekOfYearForDate(nextEpisodeDate))) {
+            return Schedule.THIS_WEEK;
+        }
+        else if(((this.getYearForDate(now) == this.getYearForDate(nextEpisodeDate)) &&
+                ((this.getWeekOfYearForDate(now)+1) == this.getWeekOfYearForDate(nextEpisodeDate))) ||
+                ((this.getYearForDate(now)+1 == this.getYearForDate(nextEpisodeDate)) &&
+                ((this.getWeekOfYearForDate(now)-52) == this.getWeekOfYearForDate(nextEpisodeDate)))) {
+            return Schedule.NEXT_WEEK;
+        }
+        else if(this.getMonthForDate(now) == this.getMonthForDate(nextEpisodeDate)) {
+            return Schedule.THIS_MONTH;
+        }
+        else if(!this.isTBD()) {
+            return Schedule.UPCOMING;
+        }
+        
+        return Schedule.TBD;
+    }
+    
     public String getAsString() {
         StringBuilder ret = new StringBuilder();
     	String showName = this.getName();
     	String nextExpisodeNum =  this.getNextEpisodeNumber();
     	String nextExpisodeTitle = this.getNextEpisodeTitle();
-    	//String nextEpisodeTime = this.getNextEpisodeTime();
     	
-    	String nextEpisodeDate;;
-    	String nextEpisodeTime;
-    	
-    	try {
-    	    //nextEpisodeTime = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a", Locale.US).format(new java.util.Date(Long.parseLong(this.getNextEpisodeTime()))); 
-    	    //nextEpisodeTime = parseRFC3339Date(this.getNextEpisodeTime()).toString();
-    	    Date parsedDate = parseRFC3339Date(this.getNextEpisodeTime());
-    	    if(parsedDate != null) {
-    	        nextEpisodeDate = new SimpleDateFormat("EEEE, MMMM d h:mm a", Locale.US).format(parsedDate);
-    	    }
-    	    else {
-    	        nextEpisodeDate = "";
-    	    }
-    	} catch (IndexOutOfBoundsException obe) {
-    	    obe.printStackTrace();
-    	    Log.d("ERROR", obe.getMessage());
-    	    nextEpisodeDate = "";
-        } catch (ParseException pe) {
-            pe.printStackTrace();
-            Log.d("ERROR", pe.getMessage());
-            nextEpisodeDate = "";
-        }
-    	
-    	nextEpisodeTime = "";
+    	String nextEpisodeDate = this.getNextEpisodeDateAsLabel();
+    	String nextEpisodeTime = "";
     	
     	if(showName!=null) {
     	    ret.append(showName + "\n");
@@ -192,35 +287,75 @@ public  class ShowInfo implements Serializable {
 
         //if there is no time zone, we don't need to do any special parsing.
         if(datestring.endsWith("Z")){
-          try{
-            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);//spec for RFC3339                    
-            d = s.parse(datestring);          
-          }
-          catch(java.text.ParseException pe){//try again with optional decimals
-            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US);//spec for RFC3339 (with fractional seconds)
-            s.setLenient(true);
-            d = s.parse(datestring);          
-          }
-          return d;
+            try{
+                SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);//spec for RFC3339                    
+                d = s.parse(datestring);
+            }
+            catch(java.text.ParseException pe){//try again with optional decimals
+                SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US);//spec for RFC3339 (with fractional seconds)
+                s.setLenient(true);
+                d = s.parse(datestring);
+            }
+            return d;
         }
 
-             //step one, split off the timezone. 
+         //step one, split off the timezone. 
         String firstpart = datestring.substring(0,datestring.lastIndexOf('-'));
         String secondpart = datestring.substring(datestring.lastIndexOf('-'));
             
-              //step two, remove the colon from the timezone offset
+        //step two, remove the colon from the timezone offset
         secondpart = secondpart.substring(0,secondpart.indexOf(':')) + secondpart.substring(secondpart.indexOf(':')+1);
         datestring  = firstpart + secondpart;
         SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);//spec for RFC3339      
-        try{
-          d = s.parse(datestring);        
+        try {
+            d = s.parse(datestring);
         }
         catch(java.text.ParseException pe){//try again with optional decimals
-          s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", Locale.US);//spec for RFC3339 (with fractional seconds)
-          s.setLenient(true);
-          d = s.parse(datestring);        
+            s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", Locale.US);//spec for RFC3339 (with fractional seconds)
+            s.setLenient(true);
+            d = s.parse(datestring);
         }
         return d;
-      }
+    }
     
+    private long getDateDiff(Date dateOne, Date dateTwo) {
+        
+        long timeOne = dateOne.getTime();
+        long timeTwo = dateTwo.getTime();
+        long oneDay = 1000 * 60 * 60 * 24;
+        long delta = (timeTwo - timeOne) / oneDay;
+
+        return delta;
+    }
+    
+    private int getMonthForDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.MONTH);
+    }
+    
+    private int getYearForDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.YEAR);
+    }
+    
+    private int getWeekOfYearForDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.WEEK_OF_YEAR);
+    }
+    
+    public int compareTo(ShowInfo si) {
+        String myNextEpisodeTime = getNextEpisodeTimeMillis();
+        String otherNextEpisodeTime = si.getNextEpisodeTimeMillis();
+        
+        if(myNextEpisodeTime == null || myNextEpisodeTime.equalsIgnoreCase("")) {
+            return 1;
+        }
+        if(otherNextEpisodeTime == null || otherNextEpisodeTime.equalsIgnoreCase("")) {
+            return -1;
+        }
+         return(Integer.parseInt(myNextEpisodeTime) - Integer.parseInt(otherNextEpisodeTime));
+    }
 }

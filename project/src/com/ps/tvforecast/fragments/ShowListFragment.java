@@ -47,7 +47,7 @@ public class ShowListFragment extends Fragment {
           @Override
           public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long rowId) {
               ShowInfo selectedShow = ShowsModelSingleton.getInstance().getShowInfoList().get(pos);
-              ShowsModelSingleton.getInstance().getShowsArrayAdapter().delete(selectedShow.getId());
+              ShowsModelSingleton.getInstance().deleteShowInfo(selectedShow);
               return true;
           }
       });

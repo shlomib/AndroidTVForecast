@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.ps.tvforecast.R;
 import com.ps.tvforecast.models.ShowInfo;
+import com.ps.tvforecast.models.ShowInfo.Schedule;
 
 public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyListHeadersAdapter {
     
@@ -71,8 +72,21 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyL
 		
 		holder.tvShowName.setText(showInfo.getName());
 		holder.tvEpisodeTitle.setText(showInfo.getNextEpisodeTitle());
-		holder.tvEpisodeDate.setText(showInfo.getNextEpisodeDate());
-		holder.tvEpisodeTime.setText(showInfo.getNextEpisodeTime());
+		holder.tvEpisodeDate.setText(showInfo.getNextEpisodeDateAsLabel());
+		
+		Schedule schedule = showInfo.getSchedule();
+		if(schedule == Schedule.TBD) {
+		    holder.tvEpisodeTime.setText("TBA");
+		}
+		else if(schedule == Schedule.TODAY) {
+		    holder.tvEpisodeTime.setText(showInfo.getNextEpisodeTimeAsLabel() + " TODAY");
+		}
+		else if(schedule == Schedule.TOMORROW) {
+            holder.tvEpisodeTime.setText(showInfo.getNextEpisodeTimeAsLabel() + " TOMORROW");
+        }
+		else {
+		    holder.tvEpisodeTime.setText(showInfo.getNextEpisodeDaysLeft() + " DAYS");
+		}
 		
         return convertView;
 	}
@@ -84,7 +98,7 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyL
 	
     @Override
     public long getHeaderId(int position) {
-        return this.getItem(position).getName().subSequence(0, 1).charAt(0);
+        return this.getItem(position).getSchedule().getId();
     }
 
     @Override
@@ -101,7 +115,7 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyL
             holder = (HeaderViewHolder) convertView.getTag();
         }
         
-        holder.tvShowListHeader.setText(showInfo.getName());
+        holder.tvShowListHeader.setText(showInfo.getSchedule().toString());
         return convertView;
     }
     

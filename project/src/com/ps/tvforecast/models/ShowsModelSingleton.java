@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,14 +61,25 @@ public class ShowsModelSingleton {
   
   public void addShowInfo(ShowInfo showInfo) {
 	  Log.d("DEBUG", "Adding ShowInfo");
-	  //showInfoList.add(showInfo);
 	  showsArrayAdapter.add(showInfo);
+	  sortShowsBySchedule();
 	  storeLocalDB("shows", getSerializedShowInfoList());
+	  showsArrayAdapter.notifyDataSetChanged();
   }
   
   public void updateShowInfo(ShowInfo showInfo) {
 	  showsArrayAdapter.update(showInfo);
+	  sortShowsBySchedule();
 	  storeLocalDB("shows", getSerializedShowInfoList());
+	  showsArrayAdapter.notifyDataSetChanged();
+  }
+  
+  public void deleteShowInfo(ShowInfo showInfo) {
+      Log.d("DEBUG", "Adding ShowInfo");
+      showsArrayAdapter.remove(showInfo);
+      sortShowsBySchedule();
+      storeLocalDB("shows", getSerializedShowInfoList());
+      showsArrayAdapter.notifyDataSetChanged();
   }
   
   private void storeLocalDB(String key, String value) {
@@ -161,6 +174,8 @@ private static void initShowInfoList() {
       else {
           Log.d("DEBUG", "no shows found in local DB");
       }
+      
+      sortShowsBySchedule();
   }
   
   public Integer getErrorCountForShowId(String showId) {
@@ -205,6 +220,17 @@ private static void initShowInfoList() {
       return searchShowResultsArrayAdapter;
   }
    
+  private static void sortShowsBySchedule() {
+      class ShowInfoComparator implements Comparator<ShowInfo> {
+          @Override
+          public int compare(ShowInfo si1, ShowInfo si2) {
+              return si1.compareTo(si2);
+          }
+      }
+      
+      Collections.sort(showInfoList, new ShowInfoComparator());
+  }
+  
   private ShowsModelSingleton() {
     // Constructor hidden because this is a singleton
   }
