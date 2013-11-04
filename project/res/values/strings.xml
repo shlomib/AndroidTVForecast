@@ -5,5 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_search_new_shows">SearchNewShowsActivity</string>
-
+    <string name="hint_show_search">Enter show name</string>
+    <string name="button_search">Search</string>
+    
 </resources>

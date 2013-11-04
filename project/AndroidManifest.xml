@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ps.tvforecast.MyShowsActivity"
+            android:name="com.ps.tvforecast.activities.MyShowsActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ps.tvforecast.SearchNewShowsActivity"
+            android:name="com.ps.tvforecast.activities.SearchNewShowsActivity"
             android:label="@string/title_activity_search_new_shows" >
         </activity>
     </application>

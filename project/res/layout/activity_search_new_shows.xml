@@ -8,43 +8,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".SearchNewShowsActivity" >
 
-    <EditText
-        android:id="@+id/etShowName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/btnSearch"
-        android:ems="10" >
-
-        <requestFocus />
-    </EditText>
-
-    <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/etShowName"
-        android:layout_alignParentRight="true"
-        android:text="Search" />
-
-    <ListView
-        android:id="@+id/lvShowResults"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etShowName"
-        android:layout_centerHorizontal="true" >
-
-    </ListView>
-
-    <ProgressBar
-        android:id="@+id/pbSearchProgress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/etShowName"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="100dp" />
+	<fragment
+	    android:id="@+id/showlistFragment"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    class="com.ps.tvforecast.fragments.SearchNewShowsFragment"
+	    tools:layout="@layout/fragment_search_new_shows" />
 
 </RelativeLayout>

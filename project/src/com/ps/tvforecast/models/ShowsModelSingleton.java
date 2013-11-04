@@ -18,8 +18,8 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
-import com.ps.tvforecast.SearchShowResultsArrayAdapter;
-import com.ps.tvforecast.ShowsArrayAdapter;
+import com.ps.tvforecast.adapters.SearchShowResultsArrayAdapter;
+import com.ps.tvforecast.adapters.ShowsArrayAdapter;
 
 
 public class ShowsModelSingleton {
@@ -114,7 +114,8 @@ public class ShowsModelSingleton {
     return result;
   }
   
-  private static void initShowInfoList() {
+@SuppressWarnings("unchecked")
+private static void initShowInfoList() {
       showInfoList = new ArrayList<ShowInfo>();
       
       String data = readLocalDB("shows");

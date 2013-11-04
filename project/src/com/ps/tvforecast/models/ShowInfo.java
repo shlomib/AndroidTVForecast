@@ -3,7 +3,6 @@ package com.ps.tvforecast.models;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -40,6 +39,16 @@ public  class ShowInfo implements Serializable {
     //TODO @ Pri extract <airtime format="GMT+0 NODST">1382652000</airtime> to get time
     
     Map<String, String> properties = new HashMap<String, String>();
+    
+    public Boolean isActive() {
+        if(this.getStatus().toUpperCase().contains("ENDED") ||
+            this.getStatus().toUpperCase().contains("CANCELED") ||
+            this.getStatus().toUpperCase().contains("REJECTED")) {
+            return false;
+        }
+        
+        return true;
+    }
     
     public String getId() {
     	return getPropertyByName(SHOW_ID);
@@ -141,8 +150,6 @@ public  class ShowInfo implements Serializable {
             nextEpisodeDate = "";
         }
     	
-    	//nextEpisodeTime = getTimeLabel(this.getNextEpisodeTime());
-    	//nextEpisodeTime = getTimeLabel(getPropertyByName(SHOW_NEXT_EPISODE_TIME_RFC));
     	nextEpisodeTime = "";
     	
     	if(showName!=null) {
@@ -176,28 +183,6 @@ public  class ShowInfo implements Serializable {
     	}
     }
     
-    private String getTimeLabel(String datestring) {
-        Calendar c0 = Calendar.getInstance(); // today
-        
-        Calendar c1 = Calendar.getInstance();
-        c1.add(Calendar.DAY_OF_YEAR, -1); // yesterday
-
-        Calendar c2 = Calendar.getInstance();
-        c2.setTime(new Date(datestring)); // your date
-
-        if (c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
-          && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)) {
-            return "YESTERDAY";
-        }
-        else if (c0.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
-                && c0.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)) {
-                  return "TODAY";
-              }
-        else {
-            return "N/A";
-        }
-    }
-    
     private static Date parseRFC3339Date(String datestring) throws java.text.ParseException, IndexOutOfBoundsException {
         if(datestring == null) {
             return null;
@@ -208,11 +193,11 @@ public  class ShowInfo implements Serializable {
         //if there is no time zone, we don't need to do any special parsing.
         if(datestring.endsWith("Z")){
           try{
-            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");//spec for RFC3339                    
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);//spec for RFC3339                    
             d = s.parse(datestring);          
           }
           catch(java.text.ParseException pe){//try again with optional decimals
-            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");//spec for RFC3339 (with fractional seconds)
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US);//spec for RFC3339 (with fractional seconds)
             s.setLenient(true);
             d = s.parse(datestring);          
           }
@@ -226,12 +211,12 @@ public  class ShowInfo implements Serializable {
               //step two, remove the colon from the timezone offset
         secondpart = secondpart.substring(0,secondpart.indexOf(':')) + secondpart.substring(secondpart.indexOf(':')+1);
         datestring  = firstpart + secondpart;
-        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");//spec for RFC3339      
+        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);//spec for RFC3339      
         try{
           d = s.parse(datestring);        
         }
         catch(java.text.ParseException pe){//try again with optional decimals
-          s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");//spec for RFC3339 (with fractional seconds)
+          s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", Locale.US);//spec for RFC3339 (with fractional seconds)
           s.setLenient(true);
           d = s.parse(datestring);        
         }
