@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.loopj.android.image.SmartImageView;
 import com.ps.tvforecast.R;
 import com.ps.tvforecast.models.ShowInfo;
 import com.ps.tvforecast.models.ShowInfo.Schedule;
@@ -64,15 +65,25 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyL
             holder.tvEpisodeTitle = (TextView) convertView.findViewById(R.id.tvEpisodeTitle);
             holder.tvEpisodeDate = (TextView) convertView.findViewById(R.id.tvEpisodeDate);
             holder.tvEpisodeTime = (TextView) convertView.findViewById(R.id.tvEpisodeTime);
+            holder.tvShowImage = (SmartImageView)  convertView.findViewById(R.id.tvShowImage);
             convertView.setTag(holder);
 		}
 		else {
-		    holder = (ItemViewHolder) convertView.getTag();
+		    holder = (ItemViewHolder) convertView.getTag();  
+		    holder.tvShowImage.setImageResource(android.R.color.transparent);
+		    
 		}
 		
 		holder.tvShowName.setText(showInfo.getName());
 		holder.tvEpisodeTitle.setText(showInfo.getNextEpisodeTitle());
 		holder.tvEpisodeDate.setText(showInfo.getNextEpisodeDateAsLabel());
+		String showImage = showInfo.getImage();
+		if(showImage== null || showImage.length()==0) {
+			holder.tvShowImage.setImageResource(R.drawable.ic_tv);
+		}
+		else {
+			holder.tvShowImage.setImageUrl(showImage);
+		}
 		
 		Schedule schedule = showInfo.getSchedule();
 		if(schedule == Schedule.TBD) {
@@ -128,6 +139,18 @@ public class ShowsArrayAdapter extends ArrayAdapter<ShowInfo> implements StickyL
         TextView tvEpisodeTitle = null;
         TextView tvEpisodeDate = null;
         TextView tvEpisodeTime = null;
+        SmartImageView tvShowImage = null;
+    }
+    
+    public void updateShowInfoWithImage(ShowInfo showInfo, String image) {
+    	ShowInfo match = getShowInfo(showInfo.getId());
+    	Log.d("DEBUG", "In updateShowInfoWithImage in ShowsArrayAdapter");
+    	if(match !=null) {
+    		match.setImage(image);
+    		match.updateShowInfo(showInfo);
+    		Log.d("DEBUG", "After match in updateShowInfoWithImage "+ match.getAsString());
+    		this.notifyDataSetChanged();
+    	}
     }
  
 }

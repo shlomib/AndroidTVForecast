@@ -32,7 +32,64 @@ public class RestClient {
 	public void getShows(List<String> showIdList) {
 		for(String showId : showIdList) {
 		    getLatestShowInfoWithEpisodeDetails(showId);
+		    getLatestShowInfoWithImage(showId);
 		}
+	}
+	
+	public void getLatestShowInfoWithImage(final String showId) {
+		String apiUrl = REST_URL + "full_show_info.php?sid=" + showId;		
+		AsyncHttpResponseHandler respHandlr = new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response)  {
+				Log.d("DEBUG", "getLatestShowInfoWithImage::onSuccess() - " + response);
+
+				if(response.contains(TvRageError)) {
+					if(ShowsModelSingleton.getInstance().getErrorCountForShowId(showId) < TvRageErrorNumRetries) {
+						ShowsModelSingleton.getInstance().incrementErrorCountForShowId(showId);
+						Log.d("DEBUG", "Show api request for showId: " + showId + " got error " + ShowsModelSingleton.getInstance().getErrorCountForShowId(showId));
+						getLatestShowInfoWithImage(showId);
+					}
+					else {
+						Log.d("DEBUG", "ERROR: Exceeding retried for showId: " + showId);
+						return;
+					}
+				}
+				else {
+					Log.d("DEBUG", "Show api request succeeded, clearing map for showId: " + showId);
+					ShowsModelSingleton.getInstance().clearErrorCountForShowId(showId);
+				}
+
+				InputStream stream = null;
+				try {
+					MyShowParser showParser = new MyShowParser();
+					InputStream in = new ByteArrayInputStream(response.getBytes());
+					String image = showParser.parseShowImage(in);
+					Log.d("DEBUG", "!!!Image is " + image);
+					ShowsModelSingleton.getInstance().updateShowImage(showId, image);
+
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				finally {
+					if (stream != null) {
+						try {
+							stream.close();
+						} catch(IOException ie) {
+						    ie.printStackTrace();
+						}
+					}
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable error) {
+				Log.d("DEBUG", "getLatestShowInfoWithEpisodeDetails::onFailure() - " + error.getMessage());
+				error.printStackTrace();
+				ShowsModelSingleton.getInstance().clearErrorCountForShowId(showId);
+			}
+		};
+		getAndHandleClientReponse(apiUrl, respHandlr);
+
 	}
 	
 	/*
@@ -65,7 +122,6 @@ public class RestClient {
             </nextepisode>
         </show>
     */
-	
 	public void getLatestShowInfoWithEpisodeDetails(final String showId) {
 		String apiUrl = REST_URL + "episodeinfo.php?sid=" + showId;		
 		AsyncHttpResponseHandler respHandlr = new AsyncHttpResponseHandler() {

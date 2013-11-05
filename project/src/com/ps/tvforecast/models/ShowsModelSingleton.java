@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.ps.tvforecast.adapters.SearchShowResultsArrayAdapter;
 import com.ps.tvforecast.adapters.ShowsArrayAdapter;
+import com.ps.tvforecast.parsers.MyShowParser;
 
 
 public class ShowsModelSingleton {
@@ -73,6 +74,16 @@ public class ShowsModelSingleton {
 	  storeLocalDB("shows", getSerializedShowInfoList());
 	  showsArrayAdapter.notifyDataSetChanged();
   }
+  
+  public void updateShowImage(String showId, String image) {
+	  ShowInfo myShowInfo = showsArrayAdapter.getShowInfo(showId);
+	  myShowInfo.setPropertyByName(MyShowParser.SHOW_IMAGE_TAG,  image);
+	  Log.d("DEBUG", "Updating showId " + showId + " with image " + image);
+	  showsArrayAdapter.update(myShowInfo);
+	  sortShowsBySchedule();
+	  storeLocalDB("shows", getSerializedShowInfoList());
+	  showsArrayAdapter.notifyDataSetChanged();
+}
   
   public void deleteShowInfo(ShowInfo showInfo) {
       Log.d("DEBUG", "Adding ShowInfo");

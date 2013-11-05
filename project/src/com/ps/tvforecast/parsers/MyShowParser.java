@@ -16,6 +16,7 @@ import java.util.Set;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.util.Log;
 import android.util.Xml;
 
 import com.ps.tvforecast.models.ShowInfo;
@@ -38,6 +39,7 @@ public class MyShowParser {
     private static final String SHOW_EPISODE_TIME_TAG = "airtime";
     private static final String SHOW_EPISODE_TITLE_TAG = "title";
     private static final String SHOW_EPISODE_NUMBER_TAG = "number";
+    public static final String SHOW_IMAGE_TAG = "image";
     
     //all the tags in Show XML that are simple elements
     // Ref http://services.tvrage.com/feeds/episodeinfo.php?sid=8511
@@ -58,6 +60,20 @@ public class MyShowParser {
     
 
     // We don't use namespaces
+    public String parseShowImage(InputStream in) throws XmlPullParserException, IOException {
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(in, null);
+            parser.nextTag();
+            return readShowImage(parser);
+        } finally {
+            in.close();
+        }
+    }
+
+
+    // We don't use namespaces
     public ShowInfo parseShow(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -69,7 +85,7 @@ public class MyShowParser {
             in.close();
         }
     }
-    
+        
     // We don't use namespaces
     public List<ShowInfo> parseResults(InputStream in) throws XmlPullParserException, IOException {
         try {
@@ -108,6 +124,31 @@ public class MyShowParser {
         return showInfos;
     }
     
+    //parse image from showImages api
+    private String readShowImage(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "Show");
+		
+		while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+        
+            String elementName = parser.getName();
+            
+            //this will read the show id and store it appropriately
+            if(parser.getName().equalsIgnoreCase(SHOW_IMAGE_TAG)) {
+            	 String image = readString(parser, elementName);
+            	 Log.d("DEBUG", "Found Image tag " + image);
+            	 return image;
+            	
+            }
+            else {
+                skip(parser);
+            }
+        }
+        return "";
+    }
+    
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them
     // off
     // to their respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
@@ -135,7 +176,7 @@ public class MyShowParser {
                 String value = readString(parser, elementName);
                 properties.put(elementName, value);
             }
-            // read all the properties related to  latest and next episodes separately since they are complex XML nodes
+            //read all the properties related to latest and next episodes separately since they are complex XML nodes
             else if(elementName.equals(SHOW_LATEST_EPISODE_TAG) || elementName.equals(SHOW_NEXT_EPISODE_TAG) ) {
             	Map<String, String> episodeProperties = readEpisodeProperties(elementName, episodeElementTags, parser);
             	properties.putAll(episodeProperties);

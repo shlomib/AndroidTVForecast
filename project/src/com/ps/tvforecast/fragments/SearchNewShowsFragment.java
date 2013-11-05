@@ -86,6 +86,9 @@ public class SearchNewShowsFragment extends Fragment {
                     ShowsModelSingleton.getInstance().addShowInfo(showToAdd);
                     ShowsModelSingleton.getInstance().getSearchShowResultsArrayAdapter().clear();
                     restClient.getLatestShowInfoWithEpisodeDetails(showToAdd.getId());
+                    restClient.getLatestShowInfoWithImage(showToAdd.getId());
+                    Toast.makeText(getActivity().getApplicationContext(), "Show " +showToAdd.getId() +"  was added", 
+                            Toast.LENGTH_SHORT).show();
                     
                     // closes the activity, returns to parent
                     getActivity().finish();

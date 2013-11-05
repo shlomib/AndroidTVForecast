@@ -190,6 +190,15 @@ public  class ShowInfo implements Serializable {
         return -1;
     }
     
+    public String getImage() {
+    	 return this.getPropertyByName("image");
+    	
+    }
+    
+    public void setImage(String image) {
+    	this.setPropertyByName( "image"  , image);
+    }
+    
     public Date getActualNextEpisodeDate() {
         Date nextEpisodeDate = null;
         try {
@@ -261,6 +270,10 @@ public  class ShowInfo implements Serializable {
     	}
         if(nextEpisodeTime!=null) {
             ret.append(nextEpisodeTime + "\n");
+        }
+        String image = this.getImage();
+        if(image!=null) {
+        	ret.append(image + "\n");
         }
     	return ret.toString();
     	
@@ -358,4 +371,5 @@ public  class ShowInfo implements Serializable {
         }
          return(Integer.parseInt(myNextEpisodeTime) - Integer.parseInt(otherNextEpisodeTime));
     }
+    
 }

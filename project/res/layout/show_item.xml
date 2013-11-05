@@ -2,54 +2,65 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000A14">
-
-    <TextView
-        android:id="@+id/tvShowName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:text="tv show name goes here..."
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF" />
+    android:padding="5dp"
+    android:paddingBottom="10dp"
+    android:background="#000A14" >
 
     <TextView
         android:id="@+id/tvEpisodeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/tvShowName"
+        android:layout_alignLeft="@+id/tvShowImage"
+        android:layout_marginLeft="90dp"
+        android:layout_below="@+id/tvShowName"
         android:text="episode title goes here..."
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp"
         android:textColor="#FFFFFF" />
-    
-    <TextView
-        android:id="@+id/tvEpisodeDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+
+    <com.loopj.android.image.SmartImageView
+        android:id="@+id/tvShowImage"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft= "5dp"
+        android:layout_marginRight= "5dp"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/tvEpisodeTitle"
-        android:text="episode date goes here..."
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp"
-        android:textColor="#0066CC" />
-    
+        android:layout_alignParentTop="true"
+        android:scaleType="fitXY"
+         />
+
     <TextView
         android:id="@+id/tvEpisodeTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/tvEpisodeDate"
-        android:text="episode time goes here..."
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_alignLeft="@+id/tvShowImage"
+         android:layout_below="@+id/tvEpisodeDate"
+        android:layout_marginLeft="90dp"
         android:layout_marginBottom="5dp"
+        android:text="episode time goes here..."
         android:textColor="#0066CC" />
+
+    <TextView
+        android:id="@+id/tvEpisodeDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvEpisodeTitle"
+        android:layout_alignLeft="@+id/tvShowImage"
+        android:layout_marginLeft="90dp"
+        android:text="episode date goes here..."
+        android:textColor="#0066CC" />
+
+    <TextView
+        android:id="@+id/tvShowName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvShowImage"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="90dp"
+        android:layout_marginTop="10dp"
+        android:text="tv show name goes here..."
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
 
 </RelativeLayout>
